@@ -1,7 +1,9 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Models;
 using Services.Interfaces;
+using WebApi.Hubs;
 
 namespace WebApi.Controllers
 {
@@ -11,9 +13,11 @@ namespace WebApi.Controllers
     {
         
         private IService<Person> Service {get;}
-        public PeopleController(IService<Person> service)
+        private IHubContext<PeopleHub> Hub {get;}
+        public PeopleController(IService<Person> service, IHubContext<PeopleHub> hubContext)
         {
             Service = service;
+            Hub = hubContext;
         }
 
         [HttpGet]
@@ -21,15 +25,18 @@ namespace WebApi.Controllers
             return Ok(await Service.ReadAsync());
         }
 
-        [HttpGet("{id:int}")]
-        public async Task<IActionResult> Get(int id) {
+        [HttpGet("{id:int}", Name = nameof(GetById))]
+        public async Task<IActionResult> GetById(int id) {
             return Ok(await Service.ReadAsync(id));
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post(Person entity) {
+        public async Task<IActionResult> Post([FromBody] Person entity) {
             entity = await Service.CreateAsync(entity);
-            return CreatedAtRoute("default", new {Id = entity.Id}, entity);
+
+            await Hub.Clients.Group("Add").SendAsync(nameof(Post), entity);
+
+            return CreatedAtRoute(nameof(GetById), new {Id = entity.Id}, entity);
         }
 
         [HttpPut("{id:int}")]
@@ -44,6 +51,7 @@ namespace WebApi.Controllers
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id) {
             await Service.DeleteAsync(id);
+            await Hub.Clients.Group("Delete").SendAsync(nameof(Delete), $"Person:{id} deleted");
             return NoContent();
         }
     }

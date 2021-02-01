@@ -17,6 +17,8 @@ using Models.Fakers;
 using Services;
 using Services.Interfaces;
 using WebApi.Controllers;
+using Newtonsoft.Json;
+using WebApi.Hubs;
 
 namespace WebApi
 {
@@ -35,7 +37,9 @@ namespace WebApi
             services.AddSingleton<PersonFaker>()
                     .AddSingleton<IService<Person>>(x => new Service<Person>(x.GetService<PersonFaker>(), 25));
 
-            services.AddControllers();
+            services.AddSignalR();
+            services.AddControllers()
+            .AddNewtonsoftJson();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebApi", Version = "v1" });
@@ -52,7 +56,7 @@ namespace WebApi
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "WebApi v1"));
             }
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
 
             app.UseRouting();
             
@@ -68,6 +72,8 @@ namespace WebApi
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapGet("/endpoint", context => context.Response.WriteAsync("Get Endpoint"));
+
+                endpoints.MapHub<PeopleHub>("signalR/People");
 
                 endpoints.MapControllers();
             });

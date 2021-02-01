@@ -42,12 +42,13 @@ namespace ConsoleSignalR
                 catch {}
             }          
 
-    if(args.Any()) {
+            if(args.Any()) {
+                System.Console.WriteLine(args[0]); 
                 if( args[0] == "Add")
                     await connection.SendAsync("JoinToAddGroup");
                 else if( args[0] == "Delete")
-                    await connection.SendAsync("JoinToDelteGroup");
-    }
+                    await connection.SendAsync("JoinToDeleteGroup");
+            }
 
             await Task.Delay(5000);
             try {

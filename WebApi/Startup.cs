@@ -12,6 +12,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using Models;
+using Models.Fakers;
+using Services;
+using Services.Interfaces;
 using WebApi.Controllers;
 
 namespace WebApi
@@ -28,6 +32,8 @@ namespace WebApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton<PersonFaker>()
+                    .AddSingleton<IService<Person>>(x => new Service<Person>(x.GetService<PersonFaker>(), 25));
 
             services.AddControllers();
             services.AddSwaggerGen(c =>

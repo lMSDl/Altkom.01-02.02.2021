@@ -2,7 +2,7 @@ using Bogus;
 
 namespace Models.Fakers
 {
-    public class PersonFaker : Faker<Person>
+    public class PersonFaker : EntityFaker<Person>
     {
         public PersonFaker() {
             RuleFor(x => x.FirstName,  f => f.Person.FirstName);

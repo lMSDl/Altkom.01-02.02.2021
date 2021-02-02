@@ -67,6 +67,15 @@ namespace WebApi
                     await next.Invoke();
             });
 
+            app.Use(async (context, next) => {
+                    if(context.GetEndpoint()?.DisplayName.Contains(typeof(WeatherForecastController).FullName) ?? false)
+                        {
+                            //logika
+                            context.Items["Days"] = 4;
+                        }
+                    await next.Invoke();
+            });
+
             app.Map("/noEndpoint", appbuilder => appbuilder.Run(context => context.Response.WriteAsync("Hello")));
 
             app.UseEndpoints(endpoints =>

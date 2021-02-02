@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option csharp_namespace = "gRPC";
+
+package gRPC;
+
+service GrpcPeopleService {
+  rpc ReadById (Person) returns (Person);
+  rpc Read (None) returns (People);
+  rpc Create (Person) returns (Person);
+  rpc Update (Person) returns (None);
+  rpc Delete (Person) returns (None);
+}
+
+message None {}
+
+message Person {
+  int32 Id = 1;
+  string FirstName = 2;
+  string LastName = 3;
+}
+
+message People {
+  repeated Person Collection = 1; 
+}

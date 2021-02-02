@@ -19,6 +19,7 @@ using Services.Interfaces;
 using WebApi.Controllers;
 using Newtonsoft.Json;
 using WebApi.Hubs;
+using Microsoft.AspNetCore.ResponseCompression;
 
 namespace WebApi
 {
@@ -34,6 +35,13 @@ namespace WebApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddResponseCompression(options => {
+                options.EnableForHttps = true;
+                options.Providers.Add<GzipCompressionProvider>();       
+            });
+            
+            services.Configure<GzipCompressionProviderOptions>( options => options.Level = System.IO.Compression.CompressionLevel.Optimal);
+
             services.AddSingleton<PersonFaker>()
                     .AddSingleton<IService<Person>>(x => new Service<Person>(x.GetService<PersonFaker>(), 25));
 
@@ -44,6 +52,7 @@ namespace WebApi
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebApi", Version = "v1" });
             });
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -57,7 +66,7 @@ namespace WebApi
             }
 
             //app.UseHttpsRedirection();
-
+            app.UseResponseCompression();
             app.UseRouting();
             
             app.UseAuthorization();
